@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Speak Up – Luyện nói tiếng Anh</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1c2321;--muted:#6b726f;--brand:#0f766e;--brand2:#115e59;--line:#e3ded3;--fb:#fff7e6;--fbb:#f0c36d}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100dvh}
+header{background:var(--brand);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;display:flex;gap:8px;align-items:center}
+header h1{font-size:17px;white-space:nowrap}
+#scenario{flex:1;min-width:0;font-size:14px;padding:8px;border-radius:10px;border:0;background:rgba(255,255,255,.18);color:#fff}
+#scenario option{color:#000}
+.icon-btn{background:rgba(255,255,255,.18);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;flex-shrink:0;cursor:pointer}
+#chat{flex:1;overflow-y:auto;padding:14px 12px 20px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+.msg{max-width:86%;padding:10px 13px;border-radius:16px;line-height:1.45;font-size:16px;white-space:pre-wrap;word-wrap:break-word}
+.ai{background:var(--card);align-self:flex-start;border:1px solid var(--line);border-bottom-left-radius:4px}
+.me{background:var(--brand);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.sys{align-self:center;text-align:center;font-size:14px;color:var(--muted);max-width:92%;line-height:1.5}
+.err{align-self:center;background:#fee2e2;color:#991b1b;border-radius:10px;padding:8px 12px;font-size:14px;max-width:92%}
+.fb{align-self:flex-end;max-width:86%;background:var(--fb);border:1px solid var(--fbb);border-radius:12px;padding:8px 11px;font-size:14px;line-height:1.45}
+.fb .better{color:#065f46;font-weight:600;margin-top:4px}
+.trans{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);color:var(--muted);font-size:14px;display:none}
+.tools{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#faf8f3;border-radius:999px;padding:5px 10px;font-size:13px;color:var(--brand2);cursor:pointer}
+.hints{display:none;margin-top:4px}
+.hint{display:block;text-align:left;width:100%;margin-top:6px;border:1px dashed var(--brand);background:#f0faf8;border-radius:10px;padding:8px 10px;font-size:14px;color:var(--ink);cursor:pointer;font-family:inherit}
+.typing{align-self:flex-start;color:var(--muted);font-style:italic;font-size:14px;padding:4px 6px}
+footer{background:var(--card);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:flex-end}
+#input{flex:1;resize:none;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;max-height:120px;font-family:inherit;background:#fdfcf9}
+#mic,#send{width:50px;height:50px;border-radius:50%;border:0;color:#fff;font-size:21px;flex-shrink:0;cursor:pointer}
+#mic{background:var(--brand)}
+#mic.on{background:#dc2626;animation:pulse 1.2s infinite}
+#send{background:#334155}
+#send:disabled{opacity:.4}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.55)}100%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
+dialog{margin:auto;border:0;border-radius:16px;padding:18px;width:min(92vw,420px);box-shadow:0 10px 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog h2{font-size:18px;margin-bottom:12px}
+dialog label{display:block;font-size:14px;margin:12px 0 4px;font-weight:600}
+dialog input[type=text],dialog input[type=password]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:16px}
+dialog .row{display:flex;align-items:center;gap:8px;font-weight:400;margin-top:10px}
+dialog small{color:var(--muted);font-size:12px;line-height:1.4;display:block;margin-top:4px}
+dialog a{color:var(--brand)}
+.btn{margin-top:16px;width:100%;padding:12px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗣️ Speak Up</h1>
+  <select id="scenario" aria-label="Chọn tình huống"></select>
+  <button class="icon-btn" id="restart" title="Bắt đầu lại">↻</button>
+  <button class="icon-btn" id="openSettings" title="Cài đặt">⚙️</button>
+</header>
+
+<main id="chat"></main>
+
+<footer>
+  <textarea id="input" rows="1" placeholder="Bấm 🎙️ để nói, hoặc gõ ở đây..." enterkeyhint="send"></textarea>
+  <button id="mic" title="Nói">🎙️</button>
+  <button id="send" title="Gửi">➤</button>
+</footer>
+
+<dialog id="settings">
+  <h2>⚙️ Cài đặt</h2>
+  <label for="apiKey">Gemini API key</label>
+  <input type="password" id="apiKey" placeholder="Dán API key vào đây" autocomplete="off">
+  <small>Lấy miễn phí tại <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Key chỉ lưu trên máy này.</small>
+
+  <label for="model">Model</label>
+  <input type="text" id="model" autocomplete="off">
+  <small>Mặc định: gemini-flash-latest (luôn trỏ tới bản Flash mới nhất).</small>
+
+  <label for="rate">Tốc độ đọc: <span id="rateVal"></span>x</label>
+  <input type="range" id="rate" min="0.6" max="1.2" step="0.05" style="width:100%">
+
+  <label class="row"><input type="checkbox" id="viFeedback"> Giải thích lỗi bằng tiếng Việt</label>
+  <label class="row"><input type="checkbox" id="autoSpeak"> Tự đọc câu trả lời của AI</label>
+  <label class="row"><input type="checkbox" id="autoSend"> Tự gửi khi nói xong</label>
+
+  <button class="btn" id="saveSettings">Lưu</button>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const chat = $('#chat'), input = $('#input'), micBtn = $('#mic'), sendBtn = $('#send'), scenarioSel = $('#scenario');
+
+const SCENARIOS = {
+  free:      { name: '💬 Nói chuyện tự do', prompt: 'A relaxed, friendly chat about the learner\'s daily life, hobbies, work or plans. You are a curious new friend.' },
+  smalltalk: { name: '🤝 Small talk gặp người mới', prompt: 'You just met the learner at a networking event. Make small talk: names, what they do, the event, weekend plans.' },
+  interview: { name: '💼 Phỏng vấn xin việc', prompt: 'You are a friendly HR interviewer at an international company. Ask common interview questions one at a time (introduce yourself, strengths, experience, why this job...).' },
+  meeting:   { name: '🧑‍💻 Họp với đồng nghiệp', prompt: 'You are a foreign colleague in a short work meeting. Discuss project progress, deadlines and problems. Ask the learner for updates and opinions.' },
+  coffee:    { name: '☕ Quán cà phê', prompt: 'You are a barista at a coffee shop. Take the learner\'s order, ask about size, sugar, ice, payment, and chat a little.' },
+  travel:    { name: '✈️ Du lịch', prompt: 'Play staff the learner meets while travelling abroad: airport check-in, then hotel reception, then asking for directions. Switch naturally when one part finishes.' }
+};
+for (const [k, v] of Object.entries(SCENARIOS)) scenarioSel.add(new Option(v.name, k));
+
+/* ---------- Settings ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let settings = Object.assign(
+  { apiKey: '', model: 'gemini-flash-latest', rate: 0.9, viFeedback: true, autoSpeak: true, autoSend: true },
+  store.get('speakup-settings', {})
+);
+scenarioSel.value = store.get('speakup-scenario', 'free');
+
+function openSettings() {
+  $('#apiKey').value = settings.apiKey;
+  $('#model').value = settings.model;
+  $('#rate').value = settings.rate; $('#rateVal').textContent = settings.rate;
+  $('#viFeedback').checked = settings.viFeedback;
+  $('#autoSpeak').checked = settings.autoSpeak;
+  $('#autoSend').checked = settings.autoSend;
+  $('#settings').showModal();
+}
+$('#rate').oninput = e => $('#rateVal').textContent = e.target.value;
+$('#openSettings').onclick = openSettings;
+$('#saveSettings').onclick = () => {
+  settings = {
+    apiKey: $('#apiKey').value.trim(),
+    model: $('#model').value.trim() || 'gemini-flash-latest',
+    rate: parseFloat($('#rate').value),
+    viFeedback: $('#viFeedback').checked,
+    autoSpeak: $('#autoSpeak').checked,
+    autoSend: $('#autoSend').checked
+  };
+  store.set('speakup-settings', settings);
+  $('#settings').close();
+  unlockTTS();
+  if (settings.apiKey && history.length === 0) start();
+};
+
+/* ---------- Text to speech ---------- */
+const hasTTS = 'speechSynthesis' in window;
+let voice = null, ttsUnlocked = false;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().map(v => Object.assign(v, { _lang: v.lang.replace('_', '-') }));
+  voice = vs.find(v => v._lang === 'en-US' && /Samantha|Google US|Aria|Jenny|Ava/i.test(v.name))
+       || vs.find(v => v._lang === 'en-US') || vs.find(v => v._lang.startsWith('en')) || null;
+}
+if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text, rate = settings.rate) {
+  if (!hasTTS || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; if (voice) u.voice = voice; u.rate = rate;
+  speechSynthesis.speak(u);
+}
+function unlockTTS() { // iOS chỉ cho phát âm thanh sau lần chạm đầu tiên
+  if (ttsUnlocked || !hasTTS) return;
+  const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u);
+  ttsUnlocked = true;
+}
+
+/* ---------- UI helpers ---------- */
+function scrollDown() { chat.scrollTop = chat.scrollHeight; }
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function addMsg(cls, text) { const m = el('div', 'msg ' + cls, text); chat.appendChild(m); scrollDown(); return m; }
+function addSys(text) { const m = el('div', 'sys', text); chat.appendChild(m); scrollDown(); return m; }
+
+function addFeedback(afterEl, r) {
+  const box = el('div', 'fb');
+  if (r.feedback) box.appendChild(el('div', '', '✏️ ' + r.feedback));
+  if (r.better) box.appendChild(el('div', 'better', '👉 ' + r.better));
+  if (r.better) {
+    const tools = el('div', 'tools');
+    const b = el('button', 'chip', '🔊 Nghe câu chuẩn'); b.onclick = () => speak(r.better);
+    tools.appendChild(b); box.appendChild(tools);
+  }
+  afterEl.after(box);
+}
+
+function addAI(r) {
+  const m = addMsg('ai', r.reply || '...');
+  const trans = el('div', 'trans', r.translation || '');
+  const hints = el('div', 'hints');
+  (r.hints || []).filter(Boolean).forEach(h => {
+    const hb = el('button', 'hint', h);
+    hb.onclick = () => { input.value = h; input.focus(); autoGrow(); };
+    hints.appendChild(hb);
+  });
+  const tools = el('div', 'tools');
+  const mk = (label, fn) => { const b = el('button', 'chip', label); b.onclick = fn; tools.appendChild(b); };
+  mk('🔊 Nghe lại', () => speak(r.reply));
+  mk('🐢 Chậm', () => speak(r.reply, 0.65));
+  if (r.translation) mk('🇻🇳 Dịch', () => { trans.style.display = trans.style.display === 'block' ? 'none' : 'block'; scrollDown(); });
+  if (hints.children.length) mk('💡 Gợi ý', () => { hints.style.display = hints.style.display === 'block' ? 'none' : 'block'; scrollDown(); });
+  m.append(trans, tools, hints);
+  scrollDown();
+}
+
+/* ---------- AI ---------- */
+let history = [];   // {role: 'user' | 'model', text}
+let busy = false;
+
+function buildSystem() {
+  const sc = SCENARIOS[scenarioSel.value];
+  const lang = settings.viFeedback ? 'Vietnamese' : 'simple English';
+  return `You are "Sam", a warm, patient English conversation partner. The learner is Vietnamese, around TOEIC 720 (B1-B2). They understand English fairly well but feel shy and nervous when speaking, so your top priority is to make them feel safe and keep them talking.
+
+SCENARIO: ${sc.prompt}
+
+RULES for "reply":
+- Natural spoken English, short: 1-3 sentences, max about 40 words.
+- React to what they said, then ask ONE simple follow-up question.
+- Never correct mistakes inside "reply". Stay in character.
+- If the learner writes Vietnamese or seems stuck, encourage them kindly in simple English and offer an easier question.
+
+The learner's messages often come from speech recognition: ignore missing punctuation, capitalization and obvious recognition errors.
+
+RULES for feedback (about the learner's LAST message only):
+- "better": how a native speaker would naturally say the same thing. Empty string if it was already natural.
+- "feedback": one short, encouraging note in ${lang} about the most important issue (grammar, word choice or naturalness). Empty string if nothing important. Do not nitpick.
+- When you are starting the conversation, both are empty.
+
+Also include:
+- "translation": Vietnamese translation of your reply.
+- "hints": 2 short example answers the learner could say next (B1 level, different ideas).
+
+Respond ONLY with JSON: {"reply":"","translation":"","feedback":"","better":"","hints":["",""]}`;
+}
+
+async function callAI() {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(settings.model)}:generateContent`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': settings.apiKey },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: buildSystem() }] },
+      contents: history.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.8 }
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error?.message || ('Lỗi HTTP ' + res.status));
+  const raw = (data.candidates?.[0]?.content?.parts || []).filter(p => !p.thought).map(p => p.text || '').join('').trim();
+  if (!raw) throw new Error('AI không trả lời (có thể bị chặn nội dung). Thử lại nhé.');
+  let obj;
+  try { obj = JSON.parse(raw.replace(/^```json\s*|```$/g, '')); }
+  catch { obj = { reply: raw, translation: '', feedback: '', better: '', hints: [] }; }
+  return { raw, obj };
+}
+
+async function turn(userText, hidden = false) {
+  if (busy) return;
+  if (!settings.apiKey) { openSettings(); return; }
+  busy = true; sendBtn.disabled = true;
+  const meEl = hidden ? null : addMsg('me', userText);
+  history.push({ role: 'user', text: userText });
+  const typing = el('div', 'typing', 'Sam đang trả lời...'); chat.appendChild(typing); scrollDown();
+  try {
+    const { raw, obj } = await callAI();
+    typing.remove();
+    history.push({ role: 'model', text: raw });
+    if (meEl && (obj.feedback || obj.better)) addFeedback(meEl, obj);
+    addAI(obj);
+    if (settings.autoSpeak) speak(obj.reply);
+  } catch (e) {
+    typing.remove();
+    history.pop();
+    if (meEl) { meEl.remove(); input.value = userText; autoGrow(); }
+    const err = addMsg('err', '⚠️ ' + e.message);
+    err.className = 'err';
+  } finally {
+    busy = false; sendBtn.disabled = false;
+  }
+}
+
+function start() {
+  if (hasTTS) speechSynthesis.cancel();
+  history = []; chat.innerHTML = '';
+  addSys(SCENARIOS[scenarioSel.value].name + ' — cứ nói sai thoải mái, không ai chấm điểm đâu 😊');
+  turn('(Start the conversation now with a short greeting and one easy question.)', true);
+}
+
+/* ---------- Input ---------- */
+function autoGrow() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 120) + 'px'; }
+input.addEventListener('input', autoGrow);
+function sendInput() {
+  const v = input.value.trim(); if (!v || busy) return;
+  input.value = ''; autoGrow(); unlockTTS(); turn(v);
+}
+sendBtn.onclick = sendInput;
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendInput(); } });
+scenarioSel.onchange = () => { store.set('speakup-scenario', scenarioSel.value); unlockTTS(); start(); };
+$('#restart').onclick = () => { unlockTTS(); start(); };
+
+/* ---------- Speech recognition ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+micBtn.onclick = () => {
+  unlockTTS();
+  if (!SR) { alert('Trình duyệt này chưa hỗ trợ nhận giọng nói. Hãy dùng Chrome (Android) hoặc Safari (iPhone).'); return; }
+  if (listening) { rec.stop(); return; }
+  if (hasTTS) speechSynthesis.cancel();
+  rec = new SR();
+  rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = true;
+  rec.onresult = e => {
+    let text = '';
+    for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+    input.value = text.trim(); autoGrow();
+  };
+  rec.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') alert('Bạn cần cho phép trang web dùng micro trong cài đặt trình duyệt.');
+  };
+  rec.onend = () => {
+    listening = false; micBtn.classList.remove('on'); micBtn.textContent = '🎙️';
+    if (settings.autoSend && input.value.trim()) sendInput();
+  };
+  input.value = ''; rec.start();
+  listening = true; micBtn.classList.add('on'); micBtn.textContent = '⏹';
+};
+
+/* ---------- Boot ---------- */
+if (settings.apiKey) start();
+else {
+  addSys('👋 Chào bạn! Để bắt đầu, hãy dán Gemini API key (miễn phí) vào phần ⚙️ Cài đặt.');
+  openSettings();
+}
+</script>
+</body>
+</html>
